@@ -9,14 +9,14 @@ import { PageManager } from '../src/pages/pageManager';
 test('expert start work ', async ({ pageManager, testData, page }) => {
   await pageManager.navigateTo(testData.getAdminUrl(), { waitUntil: 'networkidle' })
   await expect(page).toHaveTitle('AstroCRM');
-  await pageManager.onAdminLoginPage().login('shumitska@gmail.com', 'Bn57!aF790');
-  await pageManager.onAdminMainPage().startWork();
-  await expect(pageManager.onAdminMainPage().stopWorkButton).toBeVisible();
-  await expect(pageManager.onAdminMainPage().onlineText).toBeVisible();
+  await pageManager.onCRMPage().login('shumitska@gmail.com', 'Bn57!aF790');
+  await pageManager.onCRMPage().startWork();
+  await expect(pageManager.onCRMPage().stopWorkButton).toBeVisible();
+  await expect(pageManager.onCRMPage().onlineText).toBeVisible();
 
-  await pageManager.onAdminMainPage().stopWork();
-  await expect(pageManager.onAdminMainPage().startWorkButton).toBeVisible();
-  await expect(pageManager.onAdminMainPage().offlineText).toBeVisible();
+  await pageManager.onCRMPage().stopWork();
+  await expect(pageManager.onCRMPage().startWorkButton).toBeVisible();
+  await expect(pageManager.onCRMPage().offlineText).toBeVisible();
 
 });
 
@@ -24,10 +24,10 @@ test('expert start work ', async ({ pageManager, testData, page }) => {
 test('create account', async ({ pageManager, testData, browser, page, }) => {
   await pageManager.navigateTo(testData.getClientUrl());
   await expect(page).toHaveTitle('Log In ✦ Nebula');
-  // const splitIdCookie = await pageManager.onClientLoginPage().acceptCoockies(page);
+  // const splitIdCookie = await pageManager.onSignUpPage().acceptCoockies(page);
   // expect(splitIdCookie).toBeTruthy();
 
-  const message = await pageManager.onClientLoginPage().signUp(testData.getClientData());
+  const message = await pageManager.onSignUpPage().signUpNewUser(testData.getClientData());
   await expect(message).toEqual('You successfully created your account!')
 
   const context = await browser.newContext();
@@ -35,10 +35,10 @@ test('create account', async ({ pageManager, testData, browser, page, }) => {
   const adminManager = new PageManager(adminPage);
   await adminManager.navigateTo(testData.getAdminUrl(), { waitUntil: 'networkidle' })
   await expect(adminPage).toHaveTitle('AstroCRM');
-  await adminManager.onAdminLoginPage().login('shumitska@gmail.com', 'Bn57!aF790');
-  await adminManager.onAdminMainPage().startWork();
-  await expect(adminManager.onAdminMainPage().stopWorkButton).toBeVisible();
-  await expect(adminManager.onAdminMainPage().onlineText).toBeVisible();
+  await adminManager.onCRMPage().login('shumitska@gmail.com', 'Bn57!aF790');
+  await adminManager.onCRMPage().startWork();
+  await expect(adminManager.onCRMPage().stopWorkButton).toBeVisible();
+  await expect(adminManager.onCRMPage().onlineText).toBeVisible();
 
   const apiContext = await request.newContext();
   const authApi = new ApiHelper(apiContext);
@@ -48,32 +48,32 @@ test('create account', async ({ pageManager, testData, browser, page, }) => {
 
   await page.bringToFront();
   await pageManager.navigateTo(testData.getClientToExpertUrl());
-  const { name, status } = await pageManager.onExpertDetailsPage().startChatWithExpert();
+  const { name, status } = await pageManager.onExpertPage().startChatWithExpert();
   await expect(name).toEqual('Test astrologer')
   await expect(status).toEqual('Online')
-  await pageManager.onChatPage().sendMessage(testData.getMessage());
-  await pageManager.onChatPage().clickContinueForPurchaseCredits();
-  await pageManager.onChatPage().paymentProcess(testData.getCardData());
-  await pageManager.onChatPage().closeDiscountPopUp();
+  await pageManager.onExpertPage().sendMessage(testData.getMessage());
+  await pageManager.onExpertPage().clickContinueForPurchaseCredits();
+  await pageManager.onExpertPage().paymentProcess(testData.getCardData());
+  await pageManager.onExpertPage().closeDiscountPopUp();
 
   
   await adminPage.bringToFront();            
-  await adminManager.onAdminMainPage().acceptChatRequest();
+  await adminManager.onCRMPage().acceptChatRequest();
 
 
   await page.bringToFront();
-  await pageManager.onChatPage().checkStartChat();
-  await pageManager.onChatPage().sendMessage(testData.getMessage());
-  await pageManager.onChatPage().checkSendedMessage();
+  await pageManager.onExpertPage().checkChatStarted();
+  await pageManager.onExpertPage().sendMessage(testData.getMessage());
+  await pageManager.onExpertPage().checkSentMessage();
   await page.waitForTimeout(30000);
-  await pageManager.onChatPage().endChat();
+  await pageManager.onExpertPage().endChat();
 
   
   await adminPage.bringToFront();
-  await adminManager.onAdminMainPage().stopWork();
-  await expect(adminManager.onAdminMainPage().startWorkButton).toBeVisible();
-  await expect(adminManager.onAdminMainPage().offlineText).toBeVisible();
-  
+  await adminManager.onCRMPage().stopWork();
+  await expect(adminManager.onCRMPage().startWorkButton).toBeVisible();
+  await expect(adminManager.onCRMPage().offlineText).toBeVisible();
+
 
   const endBalance = await authApi.getBalance(token);
   expect(endBalance).not.toEqual(startBalance);
